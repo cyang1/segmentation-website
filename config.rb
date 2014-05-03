@@ -1,7 +1,7 @@
 activate :deploy do |deploy|
   deploy.method = :git
   # Optional Settings
-  # deploy.remote = "custom-remote" # remote name or git url, default: origin
+  deploy.remote = "https://github.com/cyang1/segmentation" # remote name or git url, default: origin
   # deploy.branch = "master" # default: gh-pages
 end
 
