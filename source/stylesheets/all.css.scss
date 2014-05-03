@@ -1,0 +1,74 @@
+@import "nvd3-rails";
+@import "ionicons";
+@import "compass/css3/user-interface";
+
+.figure {
+  border: 1px solid lightgray;
+
+  .figure-title {
+    margin-top: 10px;
+    text-align: center;
+  }
+}
+
+a.btn {
+    display: inline-block;
+    position: relative;
+    margin-bottom: 1.618em;
+    padding: 6px 12px;
+    top: 0px;
+    cursor: pointer;
+    @include user-select(none);
+
+    font-size: 1.5em;
+    font-weight: 300;
+    text-decoration: none;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+
+    color: #555;
+    background-color: #eee;
+    border-radius: 3px;
+    box-shadow: 0px 4px rgba(0, 0, 0, 0.2);
+
+    transition: all 0.15s ease-out;
+
+    i {
+        vertical-align: text-top;
+        font-size: 1.5em;
+    }
+
+    .description {
+        font-size: 0.5em;
+        line-height: 0.75em;
+    }
+
+    &:hover {
+        background: #e2e2e2;
+    }
+
+    &:active {
+        box-shadow: 0px 0px rgba(0, 0, 0, 0.2);
+        top: 4px;
+    }
+}
+
+.btn.blue {
+    color: white;
+    background-color: #009de4;
+    box-shadow: 0px 4px #006ea0;
+
+    &:hover {
+        background-color: #8bceec;
+        box-shadow: 0px 4px #009de4;
+    }
+
+    &:active {
+        box-shadow: 0px 0px #009de4;
+    }
+}
+
+#download-btn-container {
+    text-align: center;
+}
