@@ -7,27 +7,62 @@ title: Image Segmentation for Tekkotsu
 </header>
 ### Jeff Chen (jchen4), Cary Yang (caryy)
 
-When examining the pictures, we noticed that both the regular (rgb) images and the depth images had very clearly delineated blocks. The first thing that we tried took only the rgb image into account -- we simply thresholded the image with an arbitrary constant (0.65) using `img2bw`, then found the largest blob using `regionprops`. The output of `regionprops` included all necessary information, including the blob's centroid, orientation, and axis lengths. This worked well for the pictures with only the top face of the block showing. However, when more than one face of the block was showing, the calculated centroid would be offset, since the threshold would capture both faces of the block.
+For our final project, we worked on improving the color segmentations capabilities of Tekkotsu.
 
-<aside class="figure">
-	<h4 class="figure-title">Figure 1: Output on `rgba1.png`</h4>
-	<%= image_tag 'asst2fig1.png' %>
+#### Our Procedure
+
+<%= image_tag "flowchart.png" %>
+
+<aside>
+<div class="figure">
+	<%= image_tag 'raw.png' %>
+	<h4 class="figure-title">Figure 1: Input image</h4>
+</div>
+
+<div class="figure">
+	<%= image_tag 'blur.png' %>
+	<h4 class="figure-title">Figure 2: Result of bilateral filter</h4>
+</div>
+
+<div class="figure">
+	<%= image_tag 'floodfill.png' %>
+	<h4 class="figure-title">Figure 3: Result of floodfill</h4>
+</div>
+
+<div class="figure">
+	<%= image_tag 'seg.png' %>
+	<h4 class="figure-title">Figure 4: Result of segmentation</h4>
+</div>
 </aside>
 
-Next, we tried doing the same thing, but on the depth image. However, while the depth image was able to clearly distinguish between the block faces, the pictures were not taken from directly above the block, so some parts of the block were relatively far away. In fact, with a basic threshold, to capture all of the block, other pieces of the image would also be captured, creating other blobs that were bigger than the block blobs.
+1. First, we convert the color space of the image from YUV to CIELAB. This color space is specialized so that the Euclidean distance between the vector representations of two colors mirrors the perceptual difference between those colors.
 
-The solution we found was to combine the two strategies. First, we found the largest, but potentially inaccurate, blob from the rgb image. Next, we found all of the blobs from the depth image with a relatively unrestrictive threshold, to ensure that the entire top face of the blob would be captured. Then, we iterated through the depth blobs' centroids, finding the depth blob that had the closest centroid to the rgb blob. We then used the found depth blob to find the centroid, orientation, and axis length data. This method proved remarkably accurate -- though the images did not have any provided scale, the centroids appear to be within 10 pixels, and the orientation is almost perfect.
+    This step is done to ensure that our remaining steps, which rely heavily on the distance between colors,
 
-<aside class="figure">
-	<h4 class="figure-title">Figure 2: Output on `rgba8.png`</h4>
-	<%= image_tag 'asst2fig8.png' %>
-</aside>
+2. Next, we apply a bilateral filter on the image to remove noise while maintaining the the sharp edges in the image. The bilateral filter replaces the value of each pixel with a weighted average of the pixels around it. However, unlike the Gaussian filter, the bilateral filter depends on both the physical distance between the pixels and the differences between the actual color intensity.
 
-Our function `get_blob_data` will display a window with the calculated centroid (green dot), and major and minor axes of the circumscribed ellipse (blue and red lines, respectively) on top of the rgb image. In addition, the image is overlayed with a translucent version of the segmented depth image. The function takes in as input the image number and will output a vector of `[centroid, orientation]`.
+    Results of this step on the input image can be seen in Figure 2.
 
+3. On the result from step 2, we run a Canny edge detector and store the result for use in the next step.
+
+4. Now, we take the result from step 2 and run an approximate floodfill algorithm on the image, modifying the traditional floodfill algorithm to fill in adjacent pixels if they are within a certain range of the seed pixel color.
+
+    Additionally, we use the result from Canny edge detector in step 3 to ensure that the floodfill does not fill over edges in the image.
+
+    Results of this step can be seen in Figure 3.
+
+5. Finally, we convert the color space of the image back to YUV and run the original color segmentation routine on the image, with a slightly modified color map to better segment the colors in the image.
+
+    This final result can be seen in Figure 4.
+
+#### Future Work
+
+We have implemented our procedure in a `RegionSegmentedColorGenerator` class, attached, however, we have not yet changed the `RegionGenerator` class to use our new segmentation procedure.
+
+To actually link everything together, a new `sketchFromRegionSegmentedImage` would have to be created in the relevant file and then used in during the region generating process in place of the current segmenteding procedure.
 
 <div id="download-btn-container">
-  <a href="asst2code.zip" class="btn blue" role="button">
+  <a href="tekkotsu.tar" class="btn blue" role="button">
     <i class="icon ion-code-download"></i>
     Download Our Code
   </a>
