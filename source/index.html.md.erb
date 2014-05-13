@@ -11,49 +11,71 @@ For our final project, we worked on improving the color segmentations capabiliti
 
 #### Our Procedure
 
-<%= image_tag "flowchart.png" %>
+<%= image_tag 'flowchart.png' %>
 
 <aside>
 <div class="figure">
-	<%= image_tag 'raw.png' %>
-	<h4 class="figure-title">Figure 1: Input image</h4>
+  <%= image_tag 'raw.png' %>
+  <h4 class="figure-title">Input image</h4>
 </div>
 
 <div class="figure">
-	<%= image_tag 'blur.png' %>
-	<h4 class="figure-title">Figure 2: Result of bilateral filter</h4>
+  <%= image_tag 'blur.png' %>
+  <h4 class="figure-title">Step 2: Bilateral filter</h4>
 </div>
 
-<div class="figure">
-	<%= image_tag 'floodfill.png' %>
-	<h4 class="figure-title">Figure 3: Result of floodfill</h4>
-</div>
+<p></p>
 
 <div class="figure">
-	<%= image_tag 'seg.png' %>
-	<h4 class="figure-title">Figure 4: Result of segmentation</h4>
+  <%= image_tag 'canny.png' %>
+  <h4 class="figure-title">Step 3: Canny edge detector</h4>
+</div>
+
+<p></p>
+
+<div class="figure">
+  <%= image_tag 'floodfill.png' %>
+  <h4 class="figure-title">Step 4: Floodfill</h4>
+</div>
+
+<p></p>
+
+<div class="figure">
+  <%= image_tag 'seg.png' %>
+  <h4 class="figure-title">Step 5: Segmentation</h4>
+</div>
+
+<p></p>
+
+<div class="figure">
+  <%= image_tag 'orig_segmented.png' %>
+  <h4 class="figure-title">Only segmentation on input image</h4>
 </div>
 </aside>
 
 1. First, we convert the color space of the image from YUV to CIELAB. This color space is specialized so that the Euclidean distance between the vector representations of two colors mirrors the perceptual difference between those colors.
 
-    This step is done to ensure that our remaining steps, which rely heavily on the distance between colors,
+    This step is done to ensure that our remaining steps, which rely heavily on the distance between colors, is done as accurately as possible with respect to human perception.
 
 2. Next, we apply a bilateral filter on the image to remove noise while maintaining the the sharp edges in the image. The bilateral filter replaces the value of each pixel with a weighted average of the pixels around it. However, unlike the Gaussian filter, the bilateral filter depends on both the physical distance between the pixels and the differences between the actual color intensity.
 
-    Results of this step on the input image can be seen in Figure 2.
+    This noise removal step is necessary to ensure that the Canny edge detector and the floodfill do not detect and react to high-frequency noise.
 
 3. On the result from step 2, we run a Canny edge detector and store the result for use in the next step.
 
-4. Now, we take the result from step 2 and run an approximate floodfill algorithm on the image, modifying the traditional floodfill algorithm to fill in adjacent pixels if they are within a certain range of the seed pixel color.
+4. Now, we take the result from step 2 and run an approximate floodfill algorithm on the image, modifying the traditional floodfill algorithm to add adjacent pixels to the current component if they are within a certain range of the seed pixel color.
 
-    Additionally, we use the result from Canny edge detector in step 3 to ensure that the floodfill does not fill over edges in the image.
+    This is a two-pass process:
 
-    Results of this step can be seen in Figure 3.
+    1. First, we run the approximate floodfill algorithm on the image, using the result from the Canny edge detector in step 3 to ensure that the floodfill does not fill over edges in the image.
+
+    2. Then, we perform a second pass over the image and fill in each pixel with the average color of the component that it belonged to.
 
 5. Finally, we convert the color space of the image back to YUV and run the original color segmentation routine on the image, with a slightly modified color map to better segment the colors in the image.
 
-    This final result can be seen in Figure 4.
+    This final color segmentation is necessary to segment the colors in the flat, floodfill-ed image to the red, green, blue, and black colors that Tekkotsu recognizes and can handle.
+
+    As we can see to the right, our result is signficantly better than the original color segmenter at accurately determining the colors of objects regardless of lighting differences.
 
 #### Future Work
 
